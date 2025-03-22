@@ -106,8 +106,21 @@ function getCountDaysInMonth(month, year) {
  * '2024-02-01T00:00:00.000Z', '2024-02-02T00:00:00.000Z'  => 2
  * '2024-02-01T00:00:00.000Z', '2024-02-12T00:00:00.000Z'  => 12
  */
-function getCountDaysOnPeriod(/* dateStart, dateEnd */) {
-  throw new Error('Not implemented');
+function getCountDaysOnPeriod(dateStart, dateEnd) {
+  const start = new Date(dateStart);
+  const end = new Date(dateEnd);
+
+  if (Number.isNaN(start) || Number.isNaN(end)) {
+    throw new Error('Invalid date format');
+  }
+
+  if (start > end) {
+    throw new Error('Start date must be before or equal to end date');
+  }
+
+  const diff = end - start;
+  const day = diff / (1000 * 3600 * 24) + 1;
+  return day;
 }
 
 /**
@@ -127,8 +140,11 @@ function getCountDaysOnPeriod(/* dateStart, dateEnd */) {
  * '2024-02-02', { start: '2024-02-02', end: '2024-03-02' } => true
  * '2024-02-10', { start: '2024-02-02', end: '2024-03-02' } => true
  */
-function isDateInPeriod(/* date, period */) {
-  throw new Error('Not implemented');
+function isDateInPeriod(date, period) {
+  const currentDate = new Date(date);
+  const start = new Date(period.start);
+  const end = new Date(period.end);
+  return currentDate <= end && currentDate >= start;
 }
 
 /**
@@ -142,8 +158,18 @@ function isDateInPeriod(/* date, period */) {
  * '1999-01-05T02:20:00.000Z' => '1/5/1999, 2:20:00 AM'
  * '2010-12-15T22:59:00.000Z' => '12/15/2010, 10:59:00 PM'
  */
-function formatDate(/* date */) {
-  throw new Error('Not implemented');
+function formatDate(date) {
+  const dateFormat = new Date(date);
+  return dateFormat.toLocaleString('en-US', {
+    month: 'numeric',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric',
+    second: 'numeric',
+    hour12: true,
+    timeZone: '+00:00',
+  });
 }
 
 /**
@@ -158,8 +184,19 @@ function formatDate(/* date */) {
  * 12, 2023 => 10
  * 1, 2024 => 8
  */
-function getCountWeekendsInMonth(/* month, year */) {
-  throw new Error('Not implemented');
+function getCountWeekendsInMonth(month, year) {
+  const lastDayMonth = new Date(Date.UTC(year, month, 0)).getDate();
+
+  let weekDay = 0;
+
+  for (let i = 1; i <= lastDayMonth; i += 1) {
+    const day = new Date(Date.UTC(year, month - 1, i)).getDay();
+    if (day === 0 || day === 6) {
+      weekDay += 1;
+    }
+  }
+
+  return weekDay;
 }
 
 /**
@@ -178,6 +215,8 @@ function getCountWeekendsInMonth(/* month, year */) {
 function getWeekNumberByDate(/* date */) {
   throw new Error('Not implemented');
 }
+
+// console.debug('--- getWeek: ', getWeekNumberByDate(new Date(2024, 0, 31)));
 
 /**
  * Returns the date of the next Friday the 13th from a given date.
@@ -205,8 +244,10 @@ function getNextFridayThe13th(/* date */) {
  * Date(2024, 5, 1) => 2
  * Date(2024, 10, 10) => 4
  */
-function getQuarter(/* date */) {
-  throw new Error('Not implemented');
+function getQuarter(date) {
+  const month = date.getMonth();
+  const result = Math.floor(month / 3) + 1;
+  return result;
 }
 
 /**
@@ -227,8 +268,23 @@ function getQuarter(/* date */) {
  * { start: '01-01-2024', end: '15-01-2024' }, 1, 3 => ['01-01-2024', '05-01-2024', '09-01-2024', '13-01-2024']
  * { start: '01-01-2024', end: '10-01-2024' }, 1, 1 => ['01-01-2024', '03-01-2024', '05-01-2024', '07-01-2024', '09-01-2024']
  */
-function getWorkSchedule(/* period, countWorkDays, countOffDays */) {
-  throw new Error('Not implemented');
+function getWorkSchedule(period, countWorkDays, countOffDays) {
+  const shedule = [];
+  const currentDay = new Date(period.start.split('-').reverse().join('-'));
+  const endDay = new Date(period.end.split('-').reverse().join('-'));
+
+  while (currentDay <= endDay) {
+    for (let i = 0; i < countWorkDays; i += 1) {
+      if (currentDay > endDay) break;
+      const year = currentDay.getFullYear();
+      const month = (currentDay.getMonth() + 1).toString().padStart(2, '0');
+      const day = currentDay.getDate().toString().padStart(2, '0');
+      shedule.push(`${day}-${month}-${year}`);
+      currentDay.setDate(currentDay.getDate() + 1);
+    }
+    currentDay.setDate(currentDay.getDate() + countOffDays);
+  }
+  return shedule;
 }
 
 /**
