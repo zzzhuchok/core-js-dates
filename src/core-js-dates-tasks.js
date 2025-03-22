@@ -216,8 +216,6 @@ function getWeekNumberByDate(/* date */) {
   throw new Error('Not implemented');
 }
 
-// console.debug('--- getWeek: ', getWeekNumberByDate(new Date(2024, 0, 31)));
-
 /**
  * Returns the date of the next Friday the 13th from a given date.
  * Friday the 13th is considered an unlucky day in some cultures.
@@ -229,9 +227,25 @@ function getWeekNumberByDate(/* date */) {
  * Date(2024, 0, 13) => Date(2024, 8, 13)
  * Date(2023, 1, 1) => Date(2023, 9, 13)
  */
-function getNextFridayThe13th(/* date */) {
-  throw new Error('Not implemented');
+function getNextFridayThe13th(date) {
+  const checkDate = new Date(date);
+  let year = checkDate.getFullYear();
+  let month = checkDate.getMonth();
+  const SEARCH_DATE = 13;
+  const SEARCH_DAY = 5;
+
+  do {
+    checkDate.setFullYear(year, month, SEARCH_DATE);
+    month += 1;
+    if (month > 11) {
+      year += 1;
+      month = 0;
+    }
+  } while (checkDate.getDay() !== SEARCH_DAY);
+  return checkDate;
 }
+
+getNextFridayThe13th(new Date(2024, 0, 13));
 
 /**
  * Returns the quarter of the year for a given date.
@@ -299,8 +313,9 @@ function getWorkSchedule(period, countWorkDays, countOffDays) {
  * Date(2022, 2, 1) => false
  * Date(2020, 2, 1) => true
  */
-function isLeapYear(/* date */) {
-  throw new Error('Not implemented');
+function isLeapYear(date) {
+  const year = new Date(date).getFullYear();
+  return year % 4 === 0 || (year % 100 === 0 && year % 400 === 0);
 }
 
 module.exports = {
